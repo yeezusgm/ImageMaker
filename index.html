@@ -399,10 +399,11 @@
   <div class="modal">
     <div class="modal-title">Configuración del servidor</div>
     <label>URL del servidor (AUTOMATIC1111)</label>
-    <input type="text" id="api-url" value="http://127.0.0.1:7860" placeholder="http://127.0.0.1:7860">
+    <input type="text" id="api-url" value="http://localhost:8765" placeholder="http://localhost:8765">
     <label style="margin-top:12px; font-size:10px; color:var(--text3); line-height:1.6; text-transform:none; letter-spacing:0;">
-      Asegúrate de iniciar AUTOMATIC1111 con la flag <code style="color:var(--accent2)">--api</code><br>
-      Ejemplo: <code style="color:var(--accent2)">./webui.sh --api</code>
+      Corre el proxy local antes de generar:<br>
+      <code style="color:var(--accent2)">python proxy.py</code><br><br>
+      Y lanza A1111 con: <code style="color:var(--accent2)">./webui.sh --api</code>
     </label>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeSettings()">Cancelar</button>
@@ -418,7 +419,7 @@
 </div>
 
 <script>
-  let API_URL = localStorage.getItem('sd_api_url') || 'http://127.0.0.1:7860';
+  let API_URL = localStorage.getItem('sd_api_url') || 'http://localhost:8765';
   let isGenerating = false;
   let batchCount = 1;
   let selectedW = 512, selectedH = 512;
