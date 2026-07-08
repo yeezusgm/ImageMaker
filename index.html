@@ -158,6 +158,18 @@ button{font-family:inherit;cursor:pointer;color:inherit;background:none;}
   margin:20px 0; border-radius:var(--radius); overflow:hidden;
 }
 .image-frame img{width:100%; height:auto; display:block;}
+.image-frame a{display:block; width:100%;}
+
+.link-card{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  background:var(--plum-2); border:1px solid var(--line); border-top:3px solid var(--marigold);
+  padding:20px 22px; margin:20px 0; border-radius:var(--radius); text-decoration:none;
+  transition:border-color .2s, transform .2s;
+}
+.link-card:hover{border-color:var(--marigold); transform:translateY(-2px);}
+.link-card-txt{color:var(--cream); font-size:.95rem; font-weight:500;}
+.link-card-arrow{color:var(--marigold); font-size:1.1rem; transition:transform .2s;}
+.link-card:hover .link-card-arrow{transform:translateX(4px);}
 .image-frame .placeholder-txt{display:none; opacity:.55; font-size:.85rem; text-align:center; padding:26px;}
 .image-frame.img-missing .placeholder-txt{display:block;}
 
@@ -183,9 +195,9 @@ button{font-family:inherit;cursor:pointer;color:inherit;background:none;}
 .video-frame{
   background:var(--ink); border:1px solid var(--line); border-top:3px solid var(--turq); aspect-ratio:16/9; width:100%;
   display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
-  margin:24px 0; border-radius:var(--radius);
+  margin:24px 0; border-radius:var(--radius); overflow:hidden;
 }
-.video-frame video{width:100%; height:100%; object-fit:cover;}
+.video-frame video, .video-frame iframe{width:100%; height:100%; object-fit:cover; border:none; display:block;}
 .video-frame .placeholder-txt{opacity:.5; font-size:.85rem; text-align:center; padding:0 20px;}
 .upload-hint{font-family:'Space Mono',monospace; font-size:.72rem; opacity:.55; margin-top:8px;}
 
@@ -336,7 +348,7 @@ footer.museo-foot{
     <div class="resource-block">
       <h3>La brecha salarial <span class="tag">Infografía</span></h3>
       <div class="image-frame" id="infografiaFrame">
-        <img src="tu-infografia.png" alt="Infografía: brecha salarial de género en México" onerror="this.style.display='none'; this.parentElement.classList.add('img-missing');">
+        <img src="imagen/infografía.png" alt="Infografía: brecha salarial de género en México" onerror="this.style.display='none'; this.parentElement.classList.add('img-missing');">
         <p class="placeholder-txt">Espacio reservado para tu infografía (PNG o JPG).<br>Reemplaza el atributo src de la imagen con el nombre de tu archivo, por ejemplo: infografia-brecha.png</p>
       </div>
     </div>
@@ -377,7 +389,7 @@ footer.museo-foot{
     <p class="lede">El corazón audiovisual del museo: un video original de 2 a 4 minutos que pone rostro y voz a la problemática. Aquí va tu pieza — mini documental, testimonio o narrativa.</p>
 
     <div class="video-frame" id="videoFrame">
-      <p class="placeholder-txt">Espacio reservado para el video original (MP4, 2–4 min).<br>Sustituye este bloque por tu &lt;video&gt; o inserta el enlace de YouTube/Vimeo.</p>
+      <iframe id="youtubeEmbed" width="100%" height="100%" src="https://www.youtube.com/embed/-xLr7cMvKqc?si=Nh4kBQx55hV3PvM9" title="Video original — La Mitad que Falta" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
 
     <div class="script-box">
