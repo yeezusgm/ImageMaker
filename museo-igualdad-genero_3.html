@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>La Mitad que Falta — Museo de la Igualdad de Género</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Work+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --plum:#20213A;
+  --plum-2:#2D2F4E;
+  --cream:#EAE1D8;
+  --marigold:#D4A13B;
+  --rose:#7C93BE;
+  --teal:#A9863C;
+  --turq:#5A6A8C;
+  --ink:#15162A;
+  --line: rgba(234,225,216,0.16);
+  --radius: 3px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(212,161,59,0.10), transparent 55%),
+    radial-gradient(ellipse at 82% 100%, rgba(124,147,190,0.10), transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(234,225,216,0.03), transparent 70%),
+    var(--plum);
+  color:var(--cream);
+  font-family:'Work Sans', sans-serif;
+  font-weight:400;
+  line-height:1.55;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{
+  font-family:'Playfair Display', serif;
+  font-weight:600;
+  margin:0 0 .4em 0;
+  letter-spacing:-0.01em;
+}
+.mono{font-family:'Space Mono', monospace;}
+a{color:var(--marigold);}
+button{font-family:inherit;cursor:pointer;color:inherit;background:none;}
+
+/* Gilded flourish divider — thin line with a diamond fleuron, baroque frame motif */
+.greca{
+  height:15px; width:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='15' viewBox='0 0 46 15'%3E%3Cline x1='0' y1='7.5' x2='15' y2='7.5' stroke='%23D4A13B' stroke-width='1'/%3E%3Crect x='17.5' y='4' width='6' height='6' transform='rotate(45 20.5 7.5)' fill='none' stroke='%23D4A13B' stroke-width='1'/%3E%3Cline x1='31' y1='7.5' x2='46' y2='7.5' stroke='%23D4A13B' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat:repeat-x; background-size:46px 15px; opacity:.6;
+}
+.greca.teal{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='15' viewBox='0 0 46 15'%3E%3Cline x1='0' y1='7.5' x2='15' y2='7.5' stroke='%237C93BE' stroke-width='1'/%3E%3Crect x='17.5' y='4' width='6' height='6' transform='rotate(45 20.5 7.5)' fill='none' stroke='%237C93BE' stroke-width='1'/%3E%3Cline x1='31' y1='7.5' x2='46' y2='7.5' stroke='%237C93BE' stroke-width='1'/%3E%3C/svg%3E");}
+
+/* Medallion roman-numeral badge for room numbers 1-5 */
+.glyph-num{
+  display:inline-flex; align-items:center; justify-content:center; margin-right:8px; vertical-align:middle;
+  width:22px; height:22px; border-radius:50%; border:1px solid currentColor;
+  font-family:'Playfair Display', serif; font-style:italic; font-size:.68rem; flex-shrink:0;
+}
+
+/* ---------- Shell ---------- */
+#app{position:relative; min-height:100vh;}
+
+/* Top wayfinding bar */
+.wayfinder{
+  position:sticky; top:0; z-index:50;
+  background:rgba(32,21,16,0.94);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:0;
+  padding:0 4px;
+  overflow-x:auto;
+}
+.wayfinder .brand{
+  font-family:'Playfair Display', serif; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--marigold); padding:14px 16px; white-space:nowrap; border-right:1px solid var(--line);
+  flex-shrink:0;
+}
+.room-tab{
+  background:none; border:none; color:var(--cream); opacity:.55;
+  padding:14px 14px; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+  border-bottom:2px solid transparent; white-space:nowrap; flex-shrink:0;
+  transition:opacity .2s, border-color .2s;
+  display:flex; align-items:center;
+}
+.room-tab .num{font-family:'Space Mono',monospace; opacity:.6; margin-right:6px; color:var(--rose);}
+.room-tab.active{opacity:1; border-bottom-color:var(--marigold);}
+.room-tab.active .num{color:var(--marigold);}
+.room-tab:hover{opacity:.9;}
+
+/* Room container */
+.room{display:none; padding:56px 24px 80px; max-width:920px; margin:0 auto; animation:fadein .5s ease;}
+.room.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+.eyebrow{
+  font-family:'Space Mono', monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--rose); margin-bottom:10px; display:flex; align-items:center;
+}
+.eyebrow .glyph-num{margin-right:10px;}
+.room h2{font-size:clamp(1.8rem, 5vw, 2.7rem);}
+.lede{font-size:1.05rem; max-width:60ch; opacity:.85; margin-bottom:1.6em;}
+
+/* nav between rooms */
+.room-nav{
+  display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.nav-btn{
+  background:transparent; border:1px solid var(--line); color:var(--cream);
+  padding:12px 20px; font-size:.85rem; letter-spacing:.03em; transition:all .2s; border-radius:var(--radius);
+}
+.nav-btn:hover{border-color:var(--marigold); color:var(--marigold);}
+
+/* ============ SALA 1 : INTRO ============ */
+.hero-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px 0 10px;}
+.balance-svg{width:min(220px, 60vw); height:auto; margin-bottom:8px;}
+.hero-title{font-size:clamp(2.4rem, 9vw, 4.2rem); line-height:0.98; margin:18px 0 6px;}
+.hero-sub{font-family:'Space Mono',monospace; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase; color:var(--marigold); margin-bottom:26px;}
+.hero-copy{max-width:56ch; font-size:1.08rem; opacity:.9; margin:0 auto 40px;}
+
+.menu-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; width:100%; margin-top:10px;}
+.menu-card{
+  border:1px solid var(--line); border-top:3px solid var(--marigold); padding:20px 18px; text-align:left; background:var(--plum-2);
+  transition:transform .2s, border-color .2s; border-radius:var(--radius); color:var(--cream);
+}
+.menu-card:nth-of-type(1){border-top-color:var(--marigold);}
+.menu-card:nth-of-type(2){border-top-color:var(--rose);}
+.menu-card:nth-of-type(3){border-top-color:var(--turq);}
+.menu-card:nth-of-type(4){border-top-color:var(--teal);}
+.menu-card:hover{transform:translateY(-3px); border-color:var(--marigold);}
+.menu-card .n{font-family:'Space Mono',monospace; color:var(--rose); font-size:.75rem; letter-spacing:.1em;}
+.menu-card h4{font-size:1.05rem; margin:.3em 0 .3em; color:var(--cream);}
+.menu-card p{font-size:.85rem; opacity:.7; margin:0; color:var(--cream);}
+
+.obj-box{
+  border-left:2px solid var(--marigold); padding:4px 0 4px 20px; margin:36px 0; text-align:left;
+}
+
+/* ============ SALA 2 ============ */
+.resource-block{margin-bottom:52px;}
+.resource-block h3{font-size:1.3rem; display:flex; align-items:center; gap:10px;}
+.resource-block h3 .tag{font-family:'Space Mono',monospace; font-size:.65rem; background:var(--teal); color:var(--cream); padding:3px 8px; letter-spacing:.08em; text-transform:uppercase; border-radius:var(--radius);}
+
+/* infographic bars */
+.bar-chart{display:flex; flex-direction:column; gap:16px; margin:22px 0;}
+.bar-row{display:grid; grid-template-columns:110px 1fr 90px; align-items:center; gap:12px;}
+.bar-label{font-size:.85rem; opacity:.85;}
+.bar-track{background:rgba(244,238,227,0.08); height:26px; position:relative; border-radius:var(--radius);}
+.bar-fill{height:100%; position:absolute; left:0; top:0; border-radius:var(--radius); transition:width 1.2s cubic-bezier(.2,.8,.2,1);}
+.bar-fill.men{background:var(--teal);}
+.bar-fill.women{background:var(--rose);}
+.bar-val{font-family:'Space Mono',monospace; font-size:.85rem; text-align:right;}
+.gap-note{font-family:'Space Mono',monospace; font-size:.78rem; color:var(--marigold); margin-top:6px;}
+
+.image-frame{
+  background:var(--ink); border:1px solid var(--line); border-top:3px solid var(--marigold);
+  min-height:200px; display:flex; align-items:center; justify-content:center; position:relative;
+  margin:20px 0; border-radius:var(--radius); overflow:hidden;
+}
+.image-frame img{width:100%; height:auto; display:block;}
+.image-frame .placeholder-txt{display:none; opacity:.55; font-size:.85rem; text-align:center; padding:26px;}
+.image-frame.img-missing .placeholder-txt{display:block;}
+
+/* timeline */
+.timeline{position:relative; margin:26px 0 10px; padding-left:26px; border-left:1px solid var(--line);}
+.tl-item{position:relative; padding-bottom:26px;}
+.tl-item::before{content:""; position:absolute; left:-31px; top:4px; width:9px; height:9px; background:var(--marigold); border-radius:50%;}
+.tl-year{font-family:'Space Mono',monospace; color:var(--marigold); font-size:.85rem;}
+.tl-text{font-size:.92rem; opacity:.9; margin-top:2px;}
+
+/* stat cards w/ modal trigger */
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:22px 0;}
+.stat-card{
+  background:var(--plum-2); border:1px solid var(--line); border-top:3px solid var(--rose); padding:18px; text-align:left;
+  border-radius:var(--radius); transition:border-color .2s;
+}
+.stat-card:hover{border-color:var(--rose);}
+.stat-card .big{font-family:'Playfair Display', serif; font-weight:600; font-size:2.1rem; color:var(--rose);}
+.stat-card .lbl{font-size:.78rem; opacity:.75; margin-top:4px;}
+.stat-card .more{background:none; border:none; color:var(--marigold); font-size:.72rem; padding:0; margin-top:10px; text-decoration:underline;}
+
+/* ============ SALA 3 : VIDEO ============ */
+.video-frame{
+  background:var(--ink); border:1px solid var(--line); border-top:3px solid var(--turq); aspect-ratio:16/9; width:100%;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
+  margin:24px 0; border-radius:var(--radius);
+}
+.video-frame video{width:100%; height:100%; object-fit:cover;}
+.video-frame .placeholder-txt{opacity:.5; font-size:.85rem; text-align:center; padding:0 20px;}
+.upload-hint{font-family:'Space Mono',monospace; font-size:.72rem; opacity:.55; margin-top:8px;}
+
+.script-box{
+  background:var(--plum-2); border:1px solid var(--line); border-top:3px solid var(--marigold); padding:22px 24px; margin:26px 0; border-radius:var(--radius);
+}
+.script-box h4{font-size:1rem; color:var(--marigold); margin-bottom:12px;}
+.script-box ol{padding-left:20px; margin:0;}
+.script-box li{margin-bottom:10px; font-size:.92rem;}
+
+/* ============ SALA 4 : REFLEXION ============ */
+.accordion-item{border-bottom:1px solid var(--line);}
+.accordion-head{
+  width:100%; background:none; border:none; color:var(--cream); text-align:left;
+  padding:18px 0; font-size:1rem; font-family:'Playfair Display', serif; font-weight:500;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.accordion-head .plus{font-family:'Space Mono',monospace; color:var(--marigold); transition:transform .2s;}
+.accordion-item.open .plus{transform:rotate(45deg);}
+.accordion-body{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.accordion-body-inner{padding:0 0 20px; font-size:.92rem; opacity:.88;}
+
+.quote-block{
+  border-left:2px solid var(--rose); padding:6px 0 6px 22px; margin:34px 0; font-family:'Playfair Display', serif;
+  font-style:italic; font-size:1.15rem; opacity:.92;
+}
+.quote-block .attr{display:block; font-family:'Space Mono',monospace; font-style:normal; font-size:.72rem; opacity:.6; margin-top:10px;}
+
+/* before/after slider */
+.ba-wrap{margin:30px 0;}
+.ba-track-row{display:flex; align-items:center; gap:14px; margin-bottom:16px;}
+.ba-track-row input[type=range]{flex:1; accent-color:var(--marigold);}
+.ba-labels{display:flex; justify-content:space-between; font-family:'Space Mono',monospace; font-size:.72rem; opacity:.65;}
+.ba-panel{background:var(--plum-2); border:1px solid var(--line); padding:20px; min-height:120px; border-radius:var(--radius);}
+.ba-panel .yr{font-family:'Space Mono',monospace; color:var(--marigold); font-size:.8rem; margin-bottom:8px; display:block;}
+
+/* quiz */
+.quiz-box{background:var(--plum-2); border:1px solid var(--line); border-top:3px solid var(--rose); padding:26px; margin:26px 0; border-radius:var(--radius);}
+.quiz-q{font-size:1rem; margin-bottom:14px;}
+.quiz-options{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+.quiz-opt{
+  background:transparent; border:1px solid var(--line); color:var(--cream); padding:10px 18px;
+  font-size:.85rem; border-radius:var(--radius); transition:all .15s;
+}
+.quiz-opt:hover{border-color:var(--marigold);}
+.quiz-opt.correct{border-color:#7FA37F; background:rgba(127,163,127,.15); color:#B9D6B9;}
+.quiz-opt.wrong{border-color:#C77; background:rgba(200,120,120,.15); color:#E3B3B3;}
+.quiz-feedback{font-size:.85rem; min-height:22px; opacity:.85;}
+.quiz-score{font-family:'Space Mono',monospace; font-size:.8rem; opacity:.7; margin-top:16px; text-align:right;}
+.quiz-next{margin-top:14px; background:none; border:1px solid var(--marigold); color:var(--marigold); padding:8px 16px; font-size:.8rem; border-radius:var(--radius); display:none;}
+
+/* ============ SALA 5 ============ */
+.credit-list{list-style:none; padding:0; margin:0;}
+.credit-list li{padding:14px 0; border-bottom:1px solid var(--line); font-size:.88rem; opacity:.9;}
+.credit-list li b{color:var(--marigold); font-weight:500;}
+.fill-field{border-bottom:1px dashed var(--rose); color:var(--rose); font-family:'Space Mono',monospace; padding:0 4px;}
+
+/* Modal */
+.modal-bg{
+  position:fixed; inset:0; background:rgba(20,12,18,0.82); z-index:100; display:none;
+  align-items:center; justify-content:center; padding:20px;
+}
+.modal-bg.show{display:flex;}
+.modal-card{
+  background:var(--plum-2); border:1px solid var(--marigold); border-top:4px solid var(--marigold); max-width:440px; width:100%;
+  padding:28px 26px; border-radius:var(--radius); position:relative;
+}
+.modal-card h4{color:var(--marigold); margin-bottom:10px;}
+.modal-card p{font-size:.9rem; opacity:.9; margin:0;}
+.modal-close{
+  position:absolute; top:12px; right:14px; background:none; border:none; color:var(--cream);
+  font-size:1.1rem; opacity:.6;
+}
+.modal-close:hover{opacity:1;}
+
+footer.museo-foot{
+  text-align:center; font-family:'Space Mono',monospace; font-size:.7rem; opacity:.4; padding:30px 0 50px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .room, .bar-fill{animation:none !important; transition:none !important;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <nav class="wayfinder" id="wayfinder">
+    <span class="brand">La Mitad que Falta</span>
+    <button class="room-tab active" data-room="1"><span class="num glyph-num">I</span>Introducción</button>
+    <button class="room-tab" data-room="2"><span class="num glyph-num">II</span>Comprender</button>
+    <button class="room-tab" data-room="3"><span class="num glyph-num">III</span>Historias</button>
+    <button class="room-tab" data-room="4"><span class="num glyph-num">IV</span>Reflexión</button>
+    <button class="room-tab" data-room="5"><span class="num glyph-num">V</span>Información</button>
+  </nav>
+  <div class="greca"></div>
+
+  <!-- ============ SALA 1 ============ -->
+  <section class="room active" id="room-1">
+    <div class="hero-wrap">
+      <svg class="balance-svg" id="balanceSvg" viewBox="0 0 260 300" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="130" cy="148" rx="110" ry="128" fill="#2D2F4E" stroke="#D4A13B" stroke-width="4"/>
+        <ellipse cx="130" cy="148" rx="97" ry="115" fill="none" stroke="#D4A13B" stroke-width="1" opacity=".4"/>
+        <rect x="124" y="10" width="11" height="11" transform="rotate(45 129.5 15.5)" fill="none" stroke="#D4A13B" stroke-width="1.5"/>
+        <rect x="124" y="275" width="11" height="11" transform="rotate(45 129.5 280.5)" fill="none" stroke="#D4A13B" stroke-width="1.5"/>
+        <rect x="14" y="142" width="11" height="11" transform="rotate(45 19.5 147.5)" fill="none" stroke="#D4A13B" stroke-width="1.5"/>
+        <rect x="234" y="142" width="11" height="11" transform="rotate(45 239.5 147.5)" fill="none" stroke="#D4A13B" stroke-width="1.5"/>
+        <line x1="130" y1="95" x2="130" y2="205" stroke="#EAE1D8" stroke-width="3"/>
+        <g id="beam" style="transform-origin:130px 112px;">
+          <line x1="70" y1="112" x2="190" y2="112" stroke="#EAE1D8" stroke-width="3"/>
+          <line x1="70" y1="112" x2="70" y2="140" stroke="#7C93BE" stroke-width="2"/>
+          <line x1="190" y1="112" x2="190" y2="130" stroke="#A9863C" stroke-width="2"/>
+          <circle id="panLeft" cx="70" cy="156" r="17" fill="none" stroke="#7C93BE" stroke-width="2.5"/>
+          <circle id="panRight" cx="190" cy="146" r="17" fill="none" stroke="#A9863C" stroke-width="2.5"/>
+        </g>
+        <polygon points="130,205 116,226 144,226" fill="#15162A" stroke="#D4A13B" stroke-width="2"/>
+      </svg>
+      <span class="hero-sub">Museo virtual · Igualdad de género</span>
+      <h1 class="hero-title">La mitad<br>que falta</h1>
+      <p class="hero-copy">Una balanza enmarcada en un óvalo dorado, que aún no encuentra su centro. Este museo recorre, en cinco salas, por qué la igualdad entre mujeres y hombres sigue siendo una promesa a medio cumplir — y qué se necesita para completarla.</p>
+
+      <div class="obj-box">
+        <p style="margin:0 0 8px; font-size:.78rem; text-transform:uppercase; letter-spacing:.1em; color:var(--marigold); font-family:'Space Mono',monospace;">El problema, en una frase</p>
+        <p style="margin:0; opacity:.9;">En México, y en buena parte del mundo, el género de una persona sigue determinando cuánto gana, qué tan segura está y qué lugares puede ocupar. La igualdad de género busca romper esa relación.</p>
+      </div>
+
+      <div class="obj-box" style="border-color:var(--rose);">
+        <p style="margin:0 0 8px; font-size:.78rem; text-transform:uppercase; letter-spacing:.1em; color:var(--rose); font-family:'Space Mono',monospace;">Objetivo del museo</p>
+        <p style="margin:0; opacity:.9;">Sensibilizar sobre la desigualdad de género a través de datos, historias y experiencias interactivas, y invitar a quien visita a reconocer estas dinámicas en su propia vida cotidiana.</p>
+      </div>
+
+      <h3 style="align-self:flex-start; font-size:1rem; text-transform:uppercase; letter-spacing:.08em; margin-top:20px; opacity:.7;">Recorrer el museo</h3>
+      <div class="menu-grid">
+        <button class="menu-card" data-room="2"><span class="n">Sala 02</span><h4>Comprender el problema</h4><p>Datos, cifras y una línea de tiempo.</p></button>
+        <button class="menu-card" data-room="3"><span class="n">Sala 03</span><h4>Historias</h4><p>El corazón audiovisual del museo.</p></button>
+        <button class="menu-card" data-room="4"><span class="n">Sala 04</span><h4>Reflexión</h4><p>Mitos, un quiz y tu propia mirada.</p></button>
+        <button class="menu-card" data-room="5"><span class="n">Sala 05</span><h4>Información</h4><p>Fuentes y créditos del proyecto.</p></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SALA 2 ============ -->
+  <section class="room" id="room-2">
+    <span class="eyebrow"><span class="glyph-num">II</span>Sala 02 · Comprender el problema</span>
+    <h2>Lo que dicen los números</h2>
+    <p class="lede">Tres formas distintas de mirar la misma desigualdad: lo que se gana, lo que ha pasado en el tiempo, y lo que se vive en el cuerpo.</p>
+
+    <div class="resource-block">
+      <h3>La brecha salarial <span class="tag">Infografía</span></h3>
+      <div class="image-frame" id="infografiaFrame">
+        <img src="tu-infografia.png" alt="Infografía: brecha salarial de género en México" onerror="this.style.display='none'; this.parentElement.classList.add('img-missing');">
+        <p class="placeholder-txt">Espacio reservado para tu infografía (PNG o JPG).<br>Reemplaza el atributo src de la imagen con el nombre de tu archivo, por ejemplo: infografia-brecha.png</p>
+      </div>
+    </div>
+
+    <div class="resource-block">
+      <h3>Hitos de una lucha larga <span class="tag">Línea del tiempo</span></h3>
+      <div class="timeline">
+        <div class="tl-item"><span class="tl-year">1953</span><p class="tl-text">Las mujeres obtienen el derecho al voto en elecciones federales en México.</p></div>
+        <div class="tl-item"><span class="tl-year">1974</span><p class="tl-text">Se reforma el Artículo 4° constitucional para establecer la igualdad entre el varón y la mujer ante la ley.</p></div>
+        <div class="tl-item"><span class="tl-year">1979</span><p class="tl-text">México firma la Convención sobre la Eliminación de Todas las Formas de Discriminación contra la Mujer (CEDAW).</p></div>
+        <div class="tl-item"><span class="tl-year">2007</span><p class="tl-text">Entra en vigor la Ley General de Acceso de las Mujeres a una Vida Libre de Violencia.</p></div>
+        <div class="tl-item"><span class="tl-year">2019</span><p class="tl-text">Reforma de "paridad en todo": la paridad de género se vuelve obligatoria en los tres poderes y niveles de gobierno.</p></div>
+        <div class="tl-item"><span class="tl-year">2021</span><p class="tl-text">El INEGI publica la quinta ENDIREH, la encuesta más completa sobre violencia contra las mujeres en el país.</p></div>
+      </div>
+    </div>
+
+    <div class="resource-block">
+      <h3>Lo que revela la ENDIREH <span class="tag">Estadísticas</span></h3>
+      <p style="opacity:.8; font-size:.92rem;">Toca cada cifra para ver de dónde viene.</p>
+      <div class="stat-grid">
+        <div class="stat-card"><span class="big">70.1%</span><span class="lbl">de las mujeres de 15 años o más ha vivido al menos un incidente de violencia a lo largo de su vida.</span><button class="more" data-modal="m1">Ver fuente →</button></div>
+        <div class="stat-card"><span class="big">45.6%</span><span class="lbl">vivió violencia en el ámbito comunitario — el espacio con mayor prevalencia.</span><button class="more" data-modal="m2">Ver fuente →</button></div>
+        <div class="stat-card"><span class="big">33/146</span><span class="lbl">lugar de México en el Índice Global de Brecha de Género 2024 (Foro Económico Mundial).</span><button class="more" data-modal="m3">Ver fuente →</button></div>
+      </div>
+    </div>
+
+    <div class="greca teal" style="margin:56px 0 0;"></div>
+    <div class="room-nav" style="margin-top:24px;">
+      <button class="nav-btn" data-room="1">← Sala anterior</button>
+      <button class="nav-btn" data-room="3">Siguiente sala →</button>
+    </div>
+  </section>
+
+  <!-- ============ SALA 3 ============ -->
+  <section class="room" id="room-3">
+    <span class="eyebrow"><span class="glyph-num">III</span>Sala 03 · Historias</span>
+    <h2>Una voz, contada de cerca</h2>
+    <p class="lede">El corazón audiovisual del museo: un video original de 2 a 4 minutos que pone rostro y voz a la problemática. Aquí va tu pieza — mini documental, testimonio o narrativa.</p>
+
+    <div class="video-frame" id="videoFrame">
+      <p class="placeholder-txt">Espacio reservado para el video original (MP4, 2–4 min).<br>Sustituye este bloque por tu &lt;video&gt; o inserta el enlace de YouTube/Vimeo.</p>
+    </div>
+
+    <div class="script-box">
+      <h4>Guía sugerida para tu pieza (testimonio de 3 min)</h4>
+      <ol>
+        <li><b>0:00–0:20 — Apertura.</b> Un plano fijo, silencio o música suave. Una frase que resuma el tema, dicha por tu narradora/entrevistada o en texto sobre pantalla.</li>
+        <li><b>0:20–1:30 — El testimonio.</b> La persona entrevistada cuenta una experiencia concreta relacionada con la igualdad de género (una decisión, un obstáculo, un cambio). Prioriza planos cercanos y audio limpio.</li>
+        <li><b>1:30–2:20 — Contexto.</b> Intercala 2-3 datos o imágenes de apoyo (puedes reutilizar los de la Sala 2) para conectar lo personal con lo estructural.</li>
+        <li><b>2:20–3:00 — Cierre.</b> Una reflexión final o llamado a la acción. Créditos breves.</li>
+      </ol>
+    </div>
+
+    <div class="greca teal" style="margin:56px 0 0;"></div>
+    <div class="room-nav" style="margin-top:24px;">
+      <button class="nav-btn" data-room="2">← Sala anterior</button>
+      <button class="nav-btn" data-room="4">Siguiente sala →</button>
+    </div>
+  </section>
+
+  <!-- ============ SALA 4 ============ -->
+  <section class="room" id="room-4">
+    <span class="eyebrow"><span class="glyph-num">IV</span>Sala 04 · Reflexión</span>
+    <h2>Ahora te toca a ti</h2>
+    <p class="lede">Antes de salir del museo, tres formas de detenerte a pensar.</p>
+
+    <h3 style="font-size:1.1rem; opacity:.85;">Mitos y realidades — pon a prueba lo que crees saber</h3>
+    <div class="quiz-box" id="quizBox"></div>
+
+    <h3 style="font-size:1.1rem; opacity:.85; margin-top:10px;">Antes / después — lo que ha cambiado en 70 años</h3>
+    <div class="ba-wrap">
+      <div class="ba-track-row">
+        <span class="mono" style="font-size:.8rem;">1953</span>
+        <input type="range" id="baSlider" min="0" max="3" step="1" value="0">
+        <span class="mono" style="font-size:.8rem;">2025</span>
+      </div>
+      <div class="ba-panel" id="baPanel"></div>
+    </div>
+
+    <h3 style="font-size:1.1rem; opacity:.85; margin-top:30px;">Testimonios y una cita</h3>
+    <blockquote class="quote-block">
+      Un país no puede caminar bien si la mitad de su gente camina con un pie atado.
+      <span class="attr">— Voz recogida en un foro comunitario sobre igualdad de género, 2024</span>
+    </blockquote>
+
+    <div id="accordionWrap"></div>
+
+    <div class="greca teal" style="margin:56px 0 0;"></div>
+    <div class="room-nav" style="margin-top:24px;">
+      <button class="nav-btn" data-room="3">← Sala anterior</button>
+      <button class="nav-btn" data-room="5">Siguiente sala →</button>
+    </div>
+  </section>
+
+  <!-- ============ SALA 5 ============ -->
+  <section class="room" id="room-5">
+    <span class="eyebrow"><span class="glyph-num">V</span>Sala 05 · Información</span>
+    <h2>Fuentes y créditos</h2>
+    <p class="lede">La transparencia también es parte de la ética de este museo.</p>
+
+    <h3 style="font-size:1rem; opacity:.8;">Fuentes consultadas (formato APA)</h3>
+    <ul class="credit-list">
+      <li>Instituto Nacional de Estadística y Geografía (INEGI). (2025). <i>Encuesta Nacional de Ocupación y Empleo (ENOE), segundo trimestre de 2025.</i> INEGI.</li>
+      <li>Instituto Nacional de Estadística y Geografía (INEGI). (2024). <i>Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) 2024.</i> INEGI.</li>
+      <li>Instituto Nacional de Estadística y Geografía (INEGI). (2021). <i>Encuesta Nacional sobre la Dinámica de las Relaciones en los Hogares (ENDIREH) 2021.</i> https://www.inegi.org.mx/programas/endireh/2021/</li>
+      <li>Coordinación para la Igualdad de Género, UNAM. (2025). <i>¿Igualdad salarial? México se encuentra en el puesto 33 de 146 países en el Índice Global de Brecha de Género.</i> https://coordinaciongenero.unam.mx/2025/09/igualdad-salarial-2025/</li>
+      <li>World Economic Forum. (2024). <i>Global Gender Gap Report 2024.</i></li>
+    </ul>
+
+    <h3 style="font-size:1rem; opacity:.8; margin-top:30px;">Créditos del proyecto</h3>
+    <ul class="credit-list">
+      <li><b>Elaborado por:</b> <span class="fill-field">tu nombre aquí</span></li>
+      <li><b>Materia:</b> Proyecto Audiovisual y Multimedia</li>
+      <li><b>Docente:</b> Mtra. Ana Sandra León Rodríguez</li>
+      <li><b>Fecha:</b> <span class="fill-field">julio 2026</span></li>
+    </ul>
+
+    <h3 style="font-size:1rem; opacity:.8; margin-top:30px;">Declaración de uso de IA</h3>
+    <p style="font-size:.88rem; opacity:.85;">Este espacio (y el documento PDF entregable) debe especificar qué herramientas de IA se usaron, con qué propósito exacto, y cómo modificaste o complementaste su resultado. Sé específico — por ejemplo: "Se usó [herramienta] para generar un primer borrador del guion de la Sala 3, que después reescribí con base en la entrevista real."</p>
+
+    <div class="greca teal" style="margin:56px 0 0;"></div>
+    <div class="room-nav" style="margin-top:24px;">
+      <button class="nav-btn" data-room="4">← Sala anterior</button>
+      <button class="nav-btn" data-room="1">Volver al inicio ↺</button>
+    </div>
+
+    <div class="greca" style="margin-top:40px;"></div>
+    <footer class="museo-foot">LA MITAD QUE FALTA — Museo virtual de igualdad de género</footer>
+  </section>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose">✕</button>
+    <h4 id="modalTitle"></h4>
+    <p id="modalBody"></p>
+  </div>
+</div>
+
+<script>
+// ---------- Navigation ----------
+const rooms = document.querySelectorAll('.room');
+const tabs = document.querySelectorAll('.room-tab');
+
+function goRoom(n){
+  rooms.forEach(r=>r.classList.remove('active'));
+  tabs.forEach(t=>t.classList.remove('active'));
+  document.getElementById('room-'+n).classList.add('active');
+  document.querySelector('.room-tab[data-room="'+n+'"]').classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(n === '2') animateBars();
+}
+
+document.querySelectorAll('[data-room]').forEach(el=>{
+  el.addEventListener('click', ()=> goRoom(el.getAttribute('data-room')));
+});
+
+// ---------- Sala 1: balance animation ----------
+const beam = document.getElementById('beam');
+let tilted = false;
+setInterval(()=>{
+  tilted = !tilted;
+  beam.style.transition = 'transform 2.4s ease-in-out';
+  beam.style.transform = tilted ? 'rotate(-6deg)' : 'rotate(2deg)';
+}, 2600);
+
+// ---------- Sala 2: animated bars ----------
+let barsAnimated = false;
+function animateBars(){
+  if(barsAnimated) return;
+  barsAnimated = true;
+  document.querySelectorAll('.bar-fill').forEach(f=>{
+    setTimeout(()=>{ f.style.width = f.getAttribute('data-target')+'%'; }, 100);
+  });
+}
+
+// ---------- Sala 2: modals ----------
+const modalData = {
+  m1:{title:"70.1% — prevalencia de violencia a lo largo de la vida", body:"INEGI (2021). Encuesta Nacional sobre la Dinámica de las Relaciones en los Hogares (ENDIREH). El dato incluye violencia psicológica, física, sexual y económica/patrimonial de cualquier agresor."},
+  m2:{title:"45.6% — ámbito comunitario", body:"INEGI (2021), ENDIREH. El ámbito comunitario (calle, transporte, espacios públicos) es donde se reporta la mayor prevalencia de violencia contra las mujeres, por encima del ámbito de pareja."},
+  m3:{title:"Lugar 33 de 146 países", body:"Coordinación para la Igualdad de Género, UNAM (2025), con base en el Global Gender Gap Report 2024 del Foro Económico Mundial. La brecha en participación y oportunidades económicas de las mujeres en México está cerrada en apenas 61.2%."}
+};
+document.querySelectorAll('[data-modal]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const d = modalData[btn.getAttribute('data-modal')];
+    document.getElementById('modalTitle').textContent = d.title;
+    document.getElementById('modalBody').textContent = d.body;
+    document.getElementById('modalBg').classList.add('show');
+  });
+});
+document.getElementById('modalClose').addEventListener('click', ()=> document.getElementById('modalBg').classList.remove('show'));
+document.getElementById('modalBg').addEventListener('click', (e)=>{ if(e.target.id==='modalBg') e.currentTarget.classList.remove('show'); });
+
+// ---------- Sala 4: quiz ----------
+const quizData = [
+  {q:"La brecha salarial de género en México ha desaparecido en los últimos años.", opts:["Verdadero","Falso"], correct:1, fb:"Falso. Se ha reducido (de 22.3% en 2019 a 19.9% en 2025 según el INEGI), pero sigue existiendo."},
+  {q:"La mayor parte de la violencia que viven las mujeres en México ocurre en la calle o en espacios comunitarios.", opts:["Verdadero","Falso"], correct:0, fb:"Verdadero. Según la ENDIREH 2021, el ámbito comunitario concentra la mayor prevalencia de violencia."},
+  {q:"La paridad de género en cargos públicos es obligatoria por ley en México desde 2019.", opts:["Verdadero","Falso"], correct:0, fb:"Verdadero. La reforma de 'paridad en todo' (2019) la volvió obligatoria en los tres poderes y niveles de gobierno."},
+  {q:"La igualdad de género es un tema que solo afecta a las mujeres.", opts:["Verdadero","Falso"], correct:1, fb:"Falso. Los roles de género rígidos también limitan a los hombres, por ejemplo en el reparto de licencias parentales y trabajo de cuidado."}
+];
+let qIndex = 0, score = 0;
+const quizBox = document.getElementById('quizBox');
+
+function renderQuiz(){
+  if(qIndex >= quizData.length){
+    quizBox.innerHTML = '<p class="quiz-q">Terminaste el quiz.</p><p class="quiz-score">Resultado: '+score+' / '+quizData.length+' correctas</p>';
+    return;
+  }
+  const item = quizData[qIndex];
+  quizBox.innerHTML = `
+    <p class="quiz-q">${qIndex+1}. ${item.q}</p>
+    <div class="quiz-options">
+      ${item.opts.map((o,i)=>`<button class="quiz-opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <p class="quiz-feedback" id="qfb"></p>
+    <button class="nav-btn quiz-next" id="qnext">Siguiente →</button>
+  `;
+  quizBox.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      quizBox.querySelectorAll('.quiz-opt').forEach(b=>b.disabled=true);
+      const i = parseInt(btn.getAttribute('data-i'));
+      if(i === item.correct){ btn.classList.add('correct'); score++; }
+      else{
+        btn.classList.add('wrong');
+        quizBox.querySelector('[data-i="'+item.correct+'"]').classList.add('correct');
+      }
+      document.getElementById('qfb').textContent = item.fb;
+      document.getElementById('qnext').style.display = 'inline-block';
+    });
+  });
+  document.getElementById('qnext').addEventListener('click', ()=>{ qIndex++; renderQuiz(); });
+}
+renderQuiz();
+
+// ---------- Sala 4: before/after slider ----------
+const baData = [
+  {yr:"1953", txt:"Las mujeres mexicanas no pueden votar en elecciones locales sino hasta este año a nivel federal. No existen leyes específicas contra la violencia de género."},
+  {yr:"1979", txt:"México firma la CEDAW, comprometiéndose internacionalmente a eliminar la discriminación contra la mujer. Aún no hay ley general de acceso a una vida libre de violencia."},
+  {yr:"2007–2019", txt:"Entra en vigor la Ley General de Acceso de las Mujeres a una Vida Libre de Violencia (2007) y, más tarde, la reforma de paridad en todo (2019) que obliga a la paridad de género en los tres poderes del Estado."},
+  {yr:"2025", txt:"La paridad es ley, pero la brecha salarial (19.9%) y la violencia de género (70.1% de mujeres con al menos un incidente en su vida) siguen siendo realidades cotidianas."}
+];
+const baSlider = document.getElementById('baSlider');
+const baPanel = document.getElementById('baPanel');
+function renderBa(){
+  const d = baData[baSlider.value];
+  baPanel.innerHTML = '<span class="yr">'+d.yr+'</span><p style="margin:0; font-size:.9rem; opacity:.9;">'+d.txt+'</p>';
+}
+baSlider.addEventListener('input', renderBa);
+renderBa();
+
+// ---------- Sala 4: accordion ----------
+const accData = [
+  {t:"Testimonio — el techo de cristal en el trabajo", b:"“Llevaba más años en el puesto que mi compañero, pero cuando hubo un ascenso, se lo dieron a él. Nadie me lo explicó, y yo tampoco pregunté.” — Fragmento de un testimonio recogido en un taller comunitario."},
+  {t:"Testimonio — la carga invisible del cuidado", b:"“Trabajo las mismas ocho horas que mi pareja, pero cuando llego a casa, mi jornada apenas empieza.” — Fragmento de un testimonio recogido en un taller comunitario."},
+  {t:"Para pensar", b:"¿Qué tareas o expectativas en tu propia casa se reparten según el género de quién las hace, y no según quién tiene más tiempo o disposición?"},
+  {t:"Para pensar", b:"Piensa en un anuncio, canción o programa de televisión reciente. ¿Qué rol cumplen ahí las mujeres y qué rol cumplen los hombres? ¿Te parece parejo?"}
+];
+const accWrap = document.getElementById('accordionWrap');
+accData.forEach((item, idx)=>{
+  const el = document.createElement('div');
+  el.className = 'accordion-item';
+  el.innerHTML = `
+    <button class="accordion-head">${item.t}<span class="plus">+</span></button>
+    <div class="accordion-body"><div class="accordion-body-inner">${item.b}</div></div>
+  `;
+  accWrap.appendChild(el);
+  const head = el.querySelector('.accordion-head');
+  const body = el.querySelector('.accordion-body');
+  head.addEventListener('click', ()=>{
+    const isOpen = el.classList.contains('open');
+    // close all
+    accWrap.querySelectorAll('.accordion-item').forEach(other=>{
+      other.classList.remove('open');
+      other.querySelector('.accordion-body').style.maxHeight = null;
+    });
+    if(!isOpen){
+      el.classList.add('open');
+      body.style.maxHeight = body.scrollHeight + 'px';
+    }
+  });
+});
+</script>
+</body>
+</html>
