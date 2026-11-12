@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#120e1c"><title>Abyss Blade · El umbral</title>
+<meta name="description" content="Explora el bosque, descifra los sellos del Eco y despierta los faros en Abyss Blade.">
+<link rel="stylesheet" href="./style.css"></head>
+<body><main id="stage">
+ <div id="view"></div><div id="cave-veil" aria-hidden="true" hidden></div><div class="lens"></div>
+ <div id="hud" hidden>
+   <div class="vitals"><div id="energy" class="energy" role="meter" aria-label="Energía del Abismo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span aria-hidden="true">◇</span></div><div><div class="label">TOM · VIAJERO</div><div id="life"></div><div id="stock"></div></div></div>
+   <div class="chapter"><span>ABYSS BLADE</span><b id="zone">Bosque de la Vigilia</b></div>
+   <nav aria-label="Menús del juego"><button id="map" aria-label="Mapa">⌖ <span>Mapa</span></button><button id="inv" aria-label="Inventario">◇ <span>Inventario</span></button><button id="pause" aria-label="Pausa">Ⅱ</button></nav>
+ </div>
+ <div id="hint" hidden></div><div id="toast" role="status"></div>
+ <div id="touch" hidden><div><button data-act="left" aria-label="Izquierda">‹</button><button data-act="right" aria-label="Derecha">›</button></div><div><button data-act="interact" aria-label="Interactuar">E</button><button data-act="dash" aria-label="Esquivar">↝</button><button data-act="jump" aria-label="Saltar">↑</button><button data-act="attack" aria-label="Atacar">⚔</button></div></div>
+ <section id="overlay" aria-label="Menú del juego"></section>
+ <section id="cinematic" aria-label="Cinemática de la espada" hidden><div class="cine-top"></div><div class="cine-bottom"><span id="cine-caption">Santuario del Eco</span><button id="skip">Saltar escena</button></div></section>
+ <div id="flash"></div>
+</main><script type="module" src="./main.js"></script></body></html>
