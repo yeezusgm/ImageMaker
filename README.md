@@ -18,3 +18,5 @@ Con Python instalado, abre una terminal en la carpeta descomprimida y ejecuta `p
 A/D o flechas: moverse · Espacio: saltar · J: atacar · K: esquivar · E: interactuar · I: inventario y amuletos · M: mapa · Esc: pausa.
 
 Las partidas se guardan en el navegador, de forma independiente para cada dirección web.
+
+En teléfono: arrastra el joystick izquierdo y usa los botones de acción.

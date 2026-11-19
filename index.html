@@ -9,10 +9,10 @@
  <div id="hud" hidden>
    <div class="vitals"><div id="energy" class="energy" role="meter" aria-label="Energía del Abismo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span aria-hidden="true">◇</span></div><div><div class="label">TOM · VIAJERO</div><div id="life"></div><div id="stock"></div></div></div>
    <div class="chapter"><span>ABYSS BLADE</span><b id="zone">Bosque de la Vigilia</b></div>
-   <nav aria-label="Menús del juego"><button id="map" aria-label="Mapa">⌖ <span>Mapa</span></button><button id="inv" aria-label="Inventario">◇ <span>Inventario</span></button><button id="pause" aria-label="Pausa">Ⅱ</button></nav>
+   <nav aria-label="Menús del juego"><button id="map" aria-label="Mapa"><i aria-hidden="true">⌖</i><span>Mapa</span></button><button id="inv" aria-label="Inventario"><i aria-hidden="true">◇</i><span>Inventario</span></button><button id="pause" aria-label="Pausa"><i aria-hidden="true">Ⅱ</i><span>Pausa</span></button></nav>
  </div>
- <div id="hint" hidden></div><div id="toast" role="status"></div>
- <div id="touch" hidden><div><button data-act="left" aria-label="Izquierda">‹</button><button data-act="right" aria-label="Derecha">›</button></div><div><button data-act="interact" aria-label="Interactuar">E</button><button data-act="dash" aria-label="Esquivar">↝</button><button data-act="jump" aria-label="Saltar">↑</button><button data-act="attack" aria-label="Atacar">⚔</button></div></div>
+ <div id="hint" hidden></div><div id="touch-hint" hidden><span></span></div><div id="toast" role="status"></div>
+ <div id="touch" hidden><div id="joystick" role="group" aria-label="Joystick de movimiento"><span class="stick-base" aria-hidden="true"><span class="stick-knob"></span></span></div><div class="touch-actions"><button data-act="interact" aria-label="Interactuar">E</button><button data-act="dash" aria-label="Esquivar">↝</button><button data-act="jump" aria-label="Saltar">↑</button><button data-act="attack" aria-label="Atacar">⚔</button></div></div>
  <section id="overlay" aria-label="Menú del juego"></section>
  <section id="cinematic" aria-label="Cinemática de la espada" hidden><div class="cine-top"></div><div class="cine-bottom"><span id="cine-caption">Santuario del Eco</span><button id="skip">Saltar escena</button></div></section>
  <div id="flash"></div>

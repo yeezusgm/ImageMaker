@@ -3,7 +3,6 @@ import {createSimulation} from './physics.js';
 import {createWorld} from './world.js';
 import {createActors} from './actors.js';
 import {createCanvasRenderer} from './canvas-renderer.js';
-import {createPostFX} from './postfx.js';
 import {level} from './level.js';
 import {createJourney} from './journey.js';
 import {caveLight,createCaves} from './caves.js';
@@ -11,7 +10,12 @@ import {createLandmarks} from './landmarks.js';
 import {charms,capacity,charmById,createPurse} from './charms.js';
 import {charmMarkup,inventoryTabs,merchantMarkup,iconApple,iconCrystal,mapMarkup,ornament,safeText} from './interface.js';
 const $=s=>document.querySelector(s), overlay=$('#overlay'), hud=$('#hud'), hint=$('#hint');
-const touch=matchMedia('(pointer:coarse)').matches;
+const touchMedia=matchMedia('(any-pointer:coarse)');
+let touch=touchMedia.matches;
+const stage=$('#stage'), touchControls=$('#touch'), touchHint=$('#touch-hint'), joystick=$('#joystick');
+const interactButton=touchControls.querySelector('[data-act="interact"]');
+stage.classList.toggle('touch-mode',touch);
+let stickPointer=null,stickAxis=0;
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const surface=document.createElement('canvas');
 const gl=surface.getContext('webgl2',{antialias:true,alpha:false});
@@ -19,7 +23,6 @@ const renderer=gl?new THREE.WebGLRenderer({canvas:surface,context:gl,antialias:t
 renderer.domElement.setAttribute('aria-label','Escenario de Abyss Blade');
 renderer.setPixelRatio(Math.min(devicePixelRatio,gl?(touch?1.35:1.8):Math.min(1,1100/innerWidth)));
 renderer.outputColorSpace=THREE.SRGBColorSpace;$('#view').append(renderer.domElement);
-const post=gl&&!location.search.includes('nopost')?createPostFX(THREE,renderer):null;
 const scene=new THREE.Scene(), camera=new THREE.OrthographicCamera(-10,10,5,-5,.1,100);
 const sim=createSimulation({...level,health:6,hasSword:false});
 const world=createWorld(THREE,scene,{...level,swordX:level.sword.x,gateX:level.exit.x});
@@ -80,12 +83,25 @@ function panel(title,body,buttons,tag='ABYSS BLADE'){
  overlay.className=mode==='title'?'title':'';overlay.hidden=false;
  overlay.innerHTML='<div class="panel"><div class="eyebrow">'+tag+'</div>'+title+ornament+body+'<div class="actions">'+buttons+'</div></div>';
 }
-function clearInput(){pressed.clear();for(const k in held)held[k]=false;for(const k in prev)delete prev[k];touchMap.clear();document.querySelectorAll('.held').forEach(b=>b.classList.remove('held'));}
+function resetStick(){
+ const pointer=stickPointer;stickPointer=null;stickAxis=0;
+ if(pointer!==null&&joystick.hasPointerCapture(pointer))joystick.releasePointerCapture(pointer);
+ joystick.classList.remove('held');joystick.style.removeProperty('--stick-x');joystick.style.removeProperty('--stick-y');
+}
+function syncControls(){
+ const playing=mode==='play';
+ touchControls.hidden=!touch||!playing;
+ hint.hidden=touch||!playing;
+ touchHint.hidden=!touch||!playing;
+}
+function clearInput(){resetStick();pressed.clear();for(const k in held)held[k]=false;for(const k in prev)delete prev[k];for(const [id,act] of touchMap){
+   const b=touchControls.querySelector('[data-act="'+act+'"]');if(b?.hasPointerCapture(id))b.releasePointerCapture(id);
+ }touchMap.clear();document.querySelectorAll('.held').forEach(b=>b.classList.remove('held'));}
 const action=(id,label,cls='')=>'<button id="'+id+'" '+(cls?'class="'+cls+'"':'')+'>'+label+'</button>';
 const back=()=>action('back','Volver');
 const resume=()=>action('resume','Volver');
 function show(next){
- mode=next;clearInput();hud.hidden=next!=='play';$('#touch').hidden=!touch||next!=='play';hint.hidden=next!=='play';overlay.hidden=next==='play'||next==='cinema';
+ mode=next;clearInput();hud.hidden=next!=='play';syncControls();overlay.hidden=next==='play'||next==='cinema';
  $('#cinematic').hidden=next!=='cinema';
  if(next==='play'){document.activeElement?.blur();updateHUD();return;}
  if(next==='title'){
@@ -100,7 +116,7 @@ function show(next){
    }).join('');
    panel('<h2>Seleccionar partida</h2>','<div class="slots">'+rows+'</div>',back(),'ARCHIVO DEL VIAJERO');
  }
- if(next==='help')panel('<h2>Controles</h2>','<p>A/D o flechas: moverte · Espacio: saltar<br>J: atacar · K: esquivar · E: interactuar<br>I: inventario · M: mapa · Esc: pausa</p><p>Con mando táctil, usa los botones del juego.</p>',back());
+ if(next==='help')panel('<h2>Controles</h2>','<p>A/D o flechas: moverte · Espacio: saltar<br>J: atacar · K: esquivar · E: interactuar<br>I: inventario · M: mapa · Esc: pausa</p><p>En teléfono, arrastra el joystick y usa los botones de acción.</p>',back());
  if(next==='credits')panel('<h2>Créditos</h2>','<p>Abyss Blade · Proyecto de titulación de Javier.<br>Sprite de Tom y sonidos del proyecto original.<br>Versión web realizada en Three.js.</p>',back());
  if(next==='options')panel('<h2>Opciones</h2>','<div class="settings"><label for="volume">Volumen general <output id="vol-value">'+Math.round(volume*100)+' %</output></label><input id="volume" type="range" min="0" max="100" value="'+Math.round(volume*100)+'"><label class="check"><input id="motion" type="checkbox" '+(lowMotion?'checked':'')+'> Reducir destellos y sacudidas</label></div>',back(),'PREFERENCIAS');
  if(next==='pause')panel('<h2>Pausa</h2>','<p>El bosque puede esperar.</p>',action('resume','Continuar','primary')+action('openmap','Mapa')+action('options','Opciones')+action('totitle','Guardar y salir'));
@@ -162,7 +178,7 @@ function reset(data){
 function retry(){if(!relocate(checkpoint??level.spawn,true)){reset(readSave(slot));return;}show('play');}
 function speak(lines,onDone=()=>show('play')){clearInput();sequence={lines,i:0,onDone};nextLine();}
 function nextLine(){
- mode='dialogue';hint.hidden=true;hud.hidden=true;$('#touch').hidden=true;
+ mode='dialogue';hud.hidden=true;syncControls();
  if(sequence.i===sequence.lines.length){const f=sequence.onDone;sequence=null;f();return;}
  const line=sequence.lines[sequence.i++], parts=line.split(' — '),who=parts.length>1?parts.shift():'EL ECO';
  panel('<h2>'+safeText(who)+'</h2>','<p>'+safeText(parts.join(' — '))+'</p>',action('next','Continuar ↓','primary'),'DIÁLOGO · '+sequence.i+' / '+sequence.lines.length);
@@ -220,9 +236,34 @@ addEventListener('keydown',e=>{
  if(mode==='play'){held[k]=true;pressed.add(k);}
 });
 addEventListener('keyup',e=>{if(keys[e.code])held[keys[e.code]]=false;});
-addEventListener('blur',()=>{Object.keys(held).forEach(k=>held[k]=false);touchMap.clear();document.querySelectorAll('.held').forEach(b=>b.classList.remove('held'));if(mode==='play')show('pause');});
-$('#touch').addEventListener('pointerdown',e=>{const b=e.target.closest('[data-act]');if(!b)return;e.preventDefault();b.setPointerCapture(e.pointerId);touchMap.set(e.pointerId,b.dataset.act);pressed.add(b.dataset.act);b.classList.add('held');});
-for(const event of ['pointerup','pointercancel','lostpointercapture'])$('#touch').addEventListener(event,e=>{touchMap.delete(e.pointerId);e.target.classList?.remove('held');});
+addEventListener('blur',()=>{clearInput();if(mode==='play')show('pause');});
+addEventListener('orientationchange',clearInput);
+touchMedia.addEventListener('change',e=>{
+ touch=e.matches;stage.classList.toggle('touch-mode',touch);clearInput();syncControls();
+});
+function moveStick(e){
+ const r=joystick.getBoundingClientRect(), radius=Math.min(r.width,r.height)*.30;
+ const dx=(e.clientX-r.left-r.width/2)/radius,dy=(e.clientY-r.top-r.height/2)/radius;
+ const length=Math.max(1,Math.hypot(dx,dy));
+ joystick.style.setProperty('--stick-x',dx/length*radius+'px');
+ joystick.style.setProperty('--stick-y',dy/length*radius+'px');
+ const x=THREE.MathUtils.clamp(dx,-1,1),amount=Math.abs(x);
+ stickAxis=amount<.20?0:Math.sign(x)*(.32+.68*(amount-.20)/.80);
+}
+joystick.addEventListener('pointerdown',e=>{
+ if(mode!=='play'||stickPointer!==null||e.button!==0)return;
+ e.preventDefault();stickPointer=e.pointerId;joystick.setPointerCapture(e.pointerId);joystick.classList.add('held');moveStick(e);
+});
+joystick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)moveStick(e);});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])joystick.addEventListener(event,e=>{if(e.pointerId===stickPointer)resetStick();});
+touchControls.addEventListener('pointerdown',e=>{
+ const b=e.target.closest('[data-act]');if(!b||mode!=='play'||e.button!==0)return;
+ e.preventDefault();b.setPointerCapture(e.pointerId);touchMap.set(e.pointerId,b.dataset.act);pressed.add(b.dataset.act);b.classList.add('held');
+});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])touchControls.addEventListener(event,e=>{
+ const act=touchMap.get(e.pointerId);if(!act)return;
+ touchMap.delete(e.pointerId);if(![...touchMap.values()].includes(act))e.target.classList?.remove('held');
+});
 function nearby(){
  const p=sim.player, all=[];
  const item=(type,s,label,data)=>{const dx=Math.abs(p.x-s.x),dy=Math.abs(p.y-s.y);if(dx<1.48&&dy<.9)all.push({type,s,label,data,d:dx+dy*2});};
@@ -293,7 +334,7 @@ function cinematicUpdate(dt){
 function resize(){
  const w=innerWidth,h=$('#stage').clientHeight,ar=w/Math.max(1,h);
  vh=Math.max(9.4,12/ar);vw=ar*vh;
- camera.left=-vw/2;camera.right=vw/2;camera.top=vh/2;camera.bottom=-vh/2;camera.updateProjectionMatrix();renderer.setSize(w,h);post?.resize();
+ camera.left=-vw/2;camera.right=vw/2;camera.top=vh/2;camera.bottom=-vh/2;camera.updateProjectionMatrix();renderer.setSize(w,h);
 }
 addEventListener('resize',resize);resize();show('title');
 const step=1/120;
@@ -319,6 +360,7 @@ function frame(now){
  if(mode==='play'){
   elapsed+=dt;
   const input={...held};for(const k of pressed)input[k]=true;for(const k of touchMap.values())input[k]=true;
+  input.moveAxis=stickAxis;
   if(input.interact&&!prev.interact)interact();prev.interact=input.interact;
   if(mode==='play'){
    acc+=dt;while(acc>=step&&mode==='play'){sim.step(step,input);pressed.clear();events();acc-=step;}
@@ -330,8 +372,13 @@ function frame(now){
     if(!discoveredCheckpoints.has(id)&&Math.abs(p.x-c.x)<.7&&Math.abs(p.y-c.y)<.15){discoveredCheckpoints.add(id);checkpoint={...c};storeSave();}
    }
    const near=nearby();
-   const tip=near?(touch?'Toca E':'E')+' · '+near.label:!sword&&p.x>44.3?'Regresa al altar. La espada te llama.':(!touch&&sword&&p.x>=42&&p.x<49?'J · Atacar  /  K · Esquivar  /  M · Mapa':p.x<8?(touch?'Usa los botones para moverte y saltar.':'A/D o ← → para moverte · Espacio para saltar'):level.tutorials.findLast(x=>p.x>=x.x)?.text||'');
-   if(hint.textContent!==tip)hint.textContent=tip;
+   const tip=near?(touch?'':'E · ')+near.label:!sword&&p.x>44.3?'Regresa al altar. La espada te llama.':(!touch&&sword&&p.x>=42&&p.x<49?'J · Atacar  /  K · Esquivar  /  M · Mapa':p.x<8?(touch?'Arrastra el joystick. Pulsa ↑ para saltar.':'A/D o ← → para moverte · Espacio para saltar'):level.tutorials.findLast(x=>p.x>=x.x)?.text||'');
+   const tipNode=touch?touchHint.firstElementChild:hint;
+   if(tipNode.textContent!==tip)tipNode.textContent=tip;
+   touchHint.classList.toggle('near',!!near);
+   interactButton.classList.toggle('available',!!near);
+   const interactLabel=near?'Interactuar: '+near.label:'Interactuar';
+   if(interactButton.getAttribute('aria-label')!==interactLabel)interactButton.setAttribute('aria-label',interactLabel);
    updateHUD();
   }
  }else acc=0;
@@ -361,8 +408,6 @@ function frame(now){
  for(const [i,m] of shotMeshes.entries()){const q=sim.shots[i];m.visible=!!q;if(q){m.position.set(q.x,q.y,2.8);m.scale.x=1.6;m.rotation.z=t*7;}}
  for(const item of pickups){item.mesh.visible=!item.taken;item.mesh.position.set(item.x,item.y+Math.sin(t*3+item.i)*.09,1.5);item.mesh.rotation.y=t+item.i;}
 
- fxUpdate(dt);
- if(post)post.render(scene,camera,{t,fx,flash,calm:quiet(),lx:.5+(p.x-camera.position.x)/(vw/zoom),ly:.5+(p.y+.69-camera.position.y)/(vh/zoom)});else renderer.render(scene,camera);
- requestAnimationFrame(frame);
+ fxUpdate(dt);renderer.render(scene,camera);requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

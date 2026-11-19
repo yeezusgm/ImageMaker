@@ -52,9 +52,45 @@ p{line-height:1.52;color:var(--muted);margin:8px auto 15px;max-width:55ch}
 #hint{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);max-width:92%;width:max-content;text-align:center;font-size:13px;padding:8px 15px;background:#130d22ef;border:1px solid var(--line);border-radius:3px;color:#f8e4f8}
 #toast{pointer-events:none;position:absolute;top:22%;width:100%;text-align:center;font:23px Georgia,serif;color:#ffdcbb;text-shadow:0 2px 10px #000}
 #flash{pointer-events:none;background:#e6c6ff;opacity:0}
-#touch{position:absolute;inset:auto 14px max(10px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;pointer-events:none}#touch div{display:flex;align-items:end;gap:7px}#touch button{pointer-events:auto;touch-action:none;user-select:none;font-size:22px;min-width:44px;min-height:44px;padding:4px 10px;background:#21152daf}#touch button.held{background:#855690cc}
-@media(pointer:coarse){#hint{bottom:69px}}
-@media(max-width:650px){#hud{inset:10px 12px auto;grid-template-columns:1fr 1fr}.chapter{position:absolute;left:0;top:61px;text-align:left}.chapter b{font-size:15px}.chapter span,nav span{display:none}nav button{padding:6px 9px}.energy{width:44px;height:44px;flex-basis:44px}#overlay{padding:12px}.panel{padding:20px}.inventory{grid-template-columns:1fr}.cine-bottom{padding-inline:8px;grid-template-columns:1fr auto}.cine-bottom span{grid-column:1}.cine-bottom button{padding:5px 7px}}
+#hud nav i{font-style:normal}
+#hud nav button{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+#stage:not(.touch-mode) #pause span{display:none}
+#touch{position:absolute;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:max(9px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:end;gap:12px;pointer-events:none}
+.touch-actions{display:flex;gap:clamp(5px,1.3vw,9px)}
+#touch button,#joystick{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#touch button{font-size:22px;width:clamp(42px,8vmin,57px);height:clamp(42px,8vmin,57px);padding:0;background:#21152dbd}
+#touch button.held{background:#855690cc}
+#touch button.available{border-color:#e1b7ec;box-shadow:inset 0 0 12px #a574c34f}
+#joystick{--stick-size:clamp(70px,19vw,102px);width:var(--stick-size);height:var(--stick-size);position:relative;display:grid;place-items:center;cursor:grab}
+#joystick.held{cursor:grabbing}
+.stick-base{display:grid;place-items:center;width:92%;height:92%;border-radius:50%;border:1px solid #d8b9ea96;background:radial-gradient(#5d3f775d,#22152eaa 69%,#20162bbf);box-shadow:inset 0 0 0 4px #ceb2e31d,0 2px 10px #09031250;pointer-events:none}
+.stick-knob{width:43%;height:43%;border-radius:50%;border:1px solid #e7c8f6bb;background:radial-gradient(at 40% 32%,#b38dc2e6,#594169ed 79%);box-shadow:0 2px 7px #100819a8;transform:translate(var(--stick-x,0px),var(--stick-y,0px))}
+#touch-hint{position:absolute;top:calc(max(16px,env(safe-area-inset-top)) + 57px);left:50%;transform:translateX(-50%);width:max-content;max-width:min(80%,35ch);text-align:center;pointer-events:none;color:#f5e4f8;font-size:12px;line-height:1.28;text-shadow:0 1px 5px #09040e}
+#touch-hint span{display:block;padding:4px 8px;border-radius:4px;background:#171022ad;text-wrap:balance}
+#touch-hint span:empty{display:none}
+#touch-hint.near span{border:1px solid #c99cdb55}
+.touch-mode #hud nav button{min-height:40px}
+@media(orientation:landscape) and (max-height:520px){
+ .touch-mode #hud{inset:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) auto max(12px,env(safe-area-inset-left));grid-template-columns:1fr auto 1fr;gap:7px}
+ .touch-mode .chapter{position:static;text-align:center}.touch-mode .chapter b{font-size:clamp(14px,2.8vw,19px)}
+ .touch-mode .chapter span{display:none}.touch-mode .energy{width:39px;height:39px;flex-basis:39px}
+ .touch-mode #hud nav button{min-height:36px;padding:4px 7px;font-size:11px}
+ #joystick{--stick-size:clamp(67px,25dvh,90px)}
+ #touch-hint{top:calc(max(8px,env(safe-area-inset-top)) + 36px);max-width:min(50%,36ch);font-size:11px}
+}
+@media(max-width:650px) and (orientation:portrait){
+ .touch-mode #hud{grid-template-columns:minmax(0,1fr) auto;gap:4px;inset:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) auto max(8px,env(safe-area-inset-left))}
+ .touch-mode #hud nav{grid-column:2;grid-row:1;gap:4px}
+ .touch-mode #hud nav button{min-height:44px;min-width:44px;flex-direction:column;gap:2px;padding:4px 5px;font-size:10px;line-height:1}
+ .touch-mode #hud nav i{font-size:14px;line-height:1}
+ .touch-mode .vitals{min-width:0;gap:5px}.touch-mode .energy{width:32px;height:32px;flex-basis:32px;padding:3px}
+ .touch-mode .energy span{font-size:17px}.touch-mode .label{letter-spacing:.12em;font-size:9px}
+ .touch-mode #life{gap:3px;margin:4px 0}.touch-mode #life i{width:clamp(8px,2.6vw,12px);height:12px}
+ .touch-mode #stock{font-size:10px;line-height:1.2}
+ .touch-mode .chapter{position:static;grid-row:2;grid-column:1/-1;text-align:left;margin-top:5px}
+ #touch-hint{top:calc(max(8px,env(safe-area-inset-top)) + 78px)}
+}
+@media(max-width:650px){#hud{inset:10px 12px auto;grid-template-columns:1fr 1fr}.chapter{position:absolute;left:0;top:61px;text-align:left}.chapter b{font-size:15px}.chapter span{display:none}nav button{padding:6px 9px}.energy{width:44px;height:44px;flex-basis:44px}#overlay{padding:12px}.panel{padding:20px}.inventory{grid-template-columns:1fr}.cine-bottom{padding-inline:8px;grid-template-columns:1fr auto}.cine-bottom span{grid-column:1}.cine-bottom button{padding:5px 7px}}
 @media(max-height:475px){.panel{padding:13px 17px}.title .actions{display:flex;flex-wrap:wrap}.title .actions button{min-width:0}h2{font-size:29px}.slot{padding-block:4px}.dialogue .panel{padding:9px 17px}#overlay.dialogue{padding-bottom:12px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 #cave-veil{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--light-x,50%) var(--light-y,50%),transparent 0,rgba(9,10,24,.05) calc(var(--light-radius,30dvh)*.34),rgba(9,10,24,.62) var(--light-radius,30dvh),rgba(8,8,19,.96) calc(var(--light-radius,30dvh)*1.95))}

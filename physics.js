@@ -61,6 +61,7 @@ export function createSimulation(config = {}) {
   const held = Object.create(null);
   const latched = Object.create(null);
   const edge = Object.create(null);
+  let moveAxis=0;
   let remainder = 0;
   let hitstop = 0;
   let time = 0;
@@ -111,7 +112,7 @@ export function createSimulation(config = {}) {
         strikeHit: false, guarded: false, hurt: 0,
       }, { grounded: groundAt(a) });
     }));
-    remainder = hitstop = time = sinceSafe = comboWait = 0;
+    moveAxis = remainder = hitstop = time = sinceSafe = comboWait = 0;
     safe = { x: spawn.x, y: spawn.y };
     attackHits.clear();
     events.length = queuedEvents.length = 0;
@@ -335,7 +336,8 @@ export function createSimulation(config = {}) {
         p.attackPhase = t < spec.startup ? 'windup' : t < spec.end ? 'active' : 'recovery';
       }
     }
-    const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    const movement=input.left||input.right?(input.right?1:0)-(input.left?1:0):moveAxis;
+    const dir=Math.sign(movement);
     if (!p.hurt && !p.attack && !p.dash && dir) p.facing = dir;
     if (edge.dash && !p.hurt && !p.dashCooldown && (wasGrounded || p.airDash) &&
         p.attackPhase !== 'active' && p.attackPhase !== 'windup') {
@@ -370,7 +372,7 @@ export function createSimulation(config = {}) {
       else {
         const limit = p.attack ? (wasGrounded ? 0.22 : 0.70) : (input.run ? 1.10 : 1);
         const accel = wasGrounded ? (dir ? 56 : 69) : (dir ? 34 : 22);
-        p.vx = toward(p.vx, dir * RUN_SPEED * limit * (1+(p.mods.speed??0)), accel * dt);
+        p.vx = toward(p.vx, movement * RUN_SPEED * limit * (1+(p.mods.speed??0)), accel * dt);
       }
     }
 
@@ -504,6 +506,7 @@ export function createSimulation(config = {}) {
       if (EDGE_BUTTONS.includes(k) && next && !held[k]) latched[k] = true;
       held[k] = next;
     }
+    moveAxis=Number.isFinite(input.moveAxis)?clamp(input.moveAxis,-1,1):0;
     remainder += clamp(Number.isFinite(dt) ? dt : 0, 0, 0.10);
     stepping = true;
     while (remainder + EPS >= STEP) {
